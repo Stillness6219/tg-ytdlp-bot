@@ -5383,6 +5383,13 @@ def ask_quality_menu(app, message, url, tags, playlist_start_index=1, cb=None, d
                 else:
                     _ask_err_text = safe_get_messages(user_id).ALWAYS_ASK_UNSUPPORTED_URL_MSG
                 send_error_to_user(message, f"❌ <b>{_ask_err_text}</b>")
+                # If videos in a playlist are unavailable (private/age/deleted) the
+                # playlist itself may still exist and a cookie can grant access (issue #357).
+                if _ask_err_kind == 'PERMANENT_UNAVAILABLE':
+                    try:
+                        safe_send_message(user_id, safe_get_messages(user_id).SAVE_AS_COOKIE_HINT, reply_parameters=ReplyParameters(message_id=message.id), parse_mode=enums.ParseMode.HTML)
+                    except Exception as _cookie_hint_err:
+                        logger.warning(f"Failed to send cookie hint (playlist no videos): {_cookie_hint_err}")
                 return
 
             # Save minimal info to cache
