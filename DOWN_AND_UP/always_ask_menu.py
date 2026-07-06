@@ -7292,6 +7292,24 @@ def ask_quality_menu(app, message, url, tags, playlist_start_index=1, cb=None, d
             f"\n{safe_get_messages(user_id).ALWAYS_ASK_TRY_CLEAN_COMMAND_MSG}"
         )
         
+        # Override the generic message with a specific, actionable one when the
+        # yt-dlp error is recognisable (issues #352, #354, #356, #359, #360).
+        # The detailed_error above is still used for the LOG channel; only the
+        # user-facing text changes. Cookie hint keeps appending for cookie-fixable
+        # categories (members/geo/age) via the existing is_cookie_error() check.
+        from CONFIG.errors import classify_yt_dlp_error
+        _err_category = classify_yt_dlp_error(str(e), url)
+        if _err_category == "MEMBERS_ONLY":
+            error_text = safe_get_messages(user_id).ALWAYS_ASK_MEMBERS_ONLY_MSG
+        elif _err_category == "LIVE_ENDED":
+            error_text = safe_get_messages(user_id).ALWAYS_ASK_LIVE_ENDED_MSG
+        elif _err_category == "GEO_RESTRICTED":
+            error_text = safe_get_messages(user_id).ALWAYS_ASK_GEO_RESTRICTED_MSG
+        elif _err_category == "AGE_RESTRICTED":
+            error_text = safe_get_messages(user_id).ALWAYS_ASK_AGE_RESTRICTED_MSG
+        elif _err_category == "HTTP_500":
+            error_text = safe_get_messages(user_id).ALWAYS_ASK_HTTP_500_MSG
+        
         # Try to edit the processing message to show error first
         try:
             if proc_msg:
