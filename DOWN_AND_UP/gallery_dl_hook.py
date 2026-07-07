@@ -820,6 +820,14 @@ def get_total_media_count(url: str, user_id=None, use_proxy: bool = False) -> in
                     return _get_total_media_count_fallback(url, user_id, use_proxy, cfg_path)
             else:
                 logger.warning(f"get_total_media_count failed: {result.stderr[:400]}")
+                # If gallery-dl reports "No suitable extractor" / "Unsupported",
+                # the URL is fundamentally unsupported — skip the --get-urls
+                # fallback which would just re-discover the same failure and add
+                # log noise (issue #323).
+                from HELPERS.fallback_helper import is_gallery_dl_no_extractor_error
+                if is_gallery_dl_no_extractor_error(result.stderr):
+                    logger.info(f"gallery-dl reports no extractor for {url}, skipping --get-urls fallback")
+                    return None
                 # Fallback to --get-urls for sites that don't work with --simulate
                 return _get_total_media_count_fallback(url, user_id, use_proxy, cfg_path)
         finally:
@@ -900,6 +908,13 @@ def _get_total_media_count_fallback(url: str, user_id, use_proxy: bool, cfg_path
             return len(lines)
         else:
             logger.warning(f"Fallback get_total_media_count failed: {result.stderr[:400]}")
+            # If gallery-dl reports "No suitable extractor", the URL is
+            # fundamentally unsupported — skip VK/Instagram/TikTok cookie
+            # retries which would all fail the same way (issue #323).
+            from HELPERS.fallback_helper import is_gallery_dl_no_extractor_error
+            if is_gallery_dl_no_extractor_error(result.stderr):
+                logger.info(f"gallery-dl reports no extractor for {url} (--get-urls), skipping further retries")
+                return None
             # For VK, always try without cookies if failed with cookies
             if is_vk_url:
                 logger.info("[VK] Failed with cookies, trying without cookies")

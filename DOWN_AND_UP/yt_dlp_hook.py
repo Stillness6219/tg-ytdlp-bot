@@ -11,7 +11,7 @@ from URL_PARSERS.filter_check import is_no_filter_domain
 from URL_PARSERS.filter_utils import create_smart_match_filter, create_legacy_match_filter
 from HELPERS.pot_helper import add_pot_to_ytdl_opts
 from CONFIG.limits import LimitsConfig
-from HELPERS.fallback_helper import should_fallback_to_gallery_dl
+from HELPERS.fallback_helper import should_fallback_to_gallery_dl, gallery_dl_has_extractor
 
 
 # Permanent, non-transient errors that cannot be fixed by retries, cookies,
@@ -385,10 +385,10 @@ def get_video_formats(url, user_id=None, playlist_start_index=1, cookies_already
             # Unsupported URL: only allow gallery-dl fallback (non-YouTube); otherwise bail out
             # without proxy/impersonate retries which cannot help unsupported domains (issue #323).
             if 'unsupported url' in _error_lower:
-                if should_fallback_to_gallery_dl(error_text, url):
+                if gallery_dl_has_extractor(url) and should_fallback_to_gallery_dl(error_text, url):
                     logger.info(f"Unsupported URL — deferring to gallery-dl fallback for {url}")
                     return {'error': 'FALLBACK_TO_GALLERY_DL', 'original_error': error_text}
-                logger.warning(f"Unsupported URL, no retries for {url}: {error_text[:200]}")
+                logger.warning(f"Unsupported URL (no yt-dlp or gallery-dl extractor), no retries for {url}: {error_text[:200]}")
                 return {'error': 'UNSUPPORTED_URL', 'original_error': error_text}
 
             # Check for YouTube cookie errors and try automatic retry
