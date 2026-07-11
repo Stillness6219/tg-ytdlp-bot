@@ -5383,6 +5383,11 @@ def ask_quality_menu(app, message, url, tags, playlist_start_index=1, cb=None, d
                 else:
                     _ask_err_text = safe_get_messages(user_id).ALWAYS_ASK_UNSUPPORTED_URL_MSG
                 send_error_to_user(message, f"❌ <b>{_ask_err_text}</b>")
+                if _ask_err_kind == 'UNSUPPORTED_URL':
+                    try:
+                        safe_send_message(user_id, safe_get_messages(user_id).ERROR_CHECK_SUPPORTED_SITES_MSG, reply_parameters=ReplyParameters(message_id=message.id), parse_mode=enums.ParseMode.HTML)
+                    except Exception as _hint_err:
+                        logger.warning(f"Failed to send supported-sites hint: {_hint_err}")
                 # If videos in a playlist are unavailable (private/age/deleted) the
                 # playlist itself may still exist and a cookie can grant access (issue #357).
                 if _ask_err_kind == 'PERMANENT_UNAVAILABLE':
@@ -7316,6 +7321,8 @@ def ask_quality_menu(app, message, url, tags, playlist_start_index=1, cb=None, d
             error_text = safe_get_messages(user_id).ALWAYS_ASK_AGE_RESTRICTED_MSG
         elif _err_category == "HTTP_500":
             error_text = safe_get_messages(user_id).ALWAYS_ASK_HTTP_500_MSG
+        elif _err_category == "EXTRACTOR_ERROR":
+            error_text = safe_get_messages(user_id).ALWAYS_ASK_EXTRACTOR_ERROR_MSG
         
         # Try to edit the processing message to show error first
         try:

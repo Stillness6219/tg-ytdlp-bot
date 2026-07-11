@@ -1077,11 +1077,12 @@ def down_and_audio(app, message, url, tags, quality_key=None, playlist_name=None
                # Without this, yt-dlp can't extract formats ("Only images are available")
                'js_runtimes': {'node': {}},
                # Network resilience: retry on transient failures
-               'retries': 10,
-               'fragment_retries': 10,
-                'file_access_retries': 3,
-                'socket_timeout': 30,
-             }
+                'retries': 5,
+                'fragment_retries': 10,
+                 'file_access_retries': 3,
+                 'socket_timeout': 60,
+                 'source_address': '0.0.0.0',
+              }
             
             # Add download_sections if trim is enabled
             if download_sections:
@@ -2197,11 +2198,12 @@ def down_and_audio(app, message, url, tags, quality_key=None, playlist_name=None
                            # JS runtime for YouTube n-parameter challenge solving
                            'js_runtimes': {'node': {}},
                            # Network resilience
-                           'retries': 10,
-                           'fragment_retries': 10,
-                            'file_access_retries': 3,
-                            'socket_timeout': 30,
-                         }
+                            'retries': 5,
+                            'fragment_retries': 10,
+                             'file_access_retries': 3,
+                             'socket_timeout': 60,
+                             'source_address': '0.0.0.0',
+                          }
                         
                         # Add match_filter only if domain is not in NO_FILTER_DOMAINS
                         if not is_no_filter_domain(url):
