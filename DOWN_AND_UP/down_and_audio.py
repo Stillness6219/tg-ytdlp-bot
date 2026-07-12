@@ -178,6 +178,13 @@ def embed_cover_audio(audio_path, cover_path, title=None, artist=None, album=Non
             logger.info(f"Cover art not supported for {ext} format, skipping: {audio_path}")
             return True
 
+        # OGG/OPUS/FLAC cover art is embedded by yt-dlp's EmbedThumbnail
+        # postprocessor (mutagen-based). ffmpeg cannot embed covers in
+        # OGG containers — skip to avoid corrupting the file.
+        if ext in ('.opus', '.ogg'):
+            logger.info(f"Cover art for {ext} handled by EmbedThumbnail (mutagen), skipping ffmpeg: {audio_path}")
+            return True
+
         logger.info(f"Starting cover embedding: {audio_path} ({ext}), Cover={cover_path}")
 
         if not os.path.exists(audio_path):
@@ -1119,6 +1126,15 @@ def down_and_audio(app, message, url, tags, quality_key=None, playlist_name=None
             postprocessors.append({
                 'key': 'FFmpegMetadata'   # equivalent to --add-metadata
             })
+
+            # Add EmbedThumbnail postprocessor (same as video path).
+            # Uses mutagen internally — correctly embeds cover art in
+            # MP3 (ID3v2), M4A (covr), OGG/OPUS/Vorbis (METADATA_BLOCK_PICTURE), FLAC.
+            # ffmpeg alone cannot embed covers in OGG/OPUS containers.
+            embed_thumbnail = user_args.get('embed_thumbnail', True) if user_args else True
+            if embed_thumbnail:
+                postprocessors.append({'key': 'EmbedThumbnail'})
+                logger.info(f"User {user_id} embed_thumbnail={embed_thumbnail}, adding EmbedThumbnail postprocessor for audio")
             
             ytdl_opts = {
                'format': download_format,
@@ -1213,6 +1229,8 @@ def down_and_audio(app, message, url, tags, quality_key=None, playlist_name=None
                 # ignoreerrors is set based on user's ignore_errors setting
                 user_args_copy = user_args.copy()
                 user_args_copy.pop('ignoreerrors', None)
+                # embed_thumbnail is already handled via EmbedThumbnail postprocessor above
+                user_args_copy.pop('embed_thumbnail', None)
                 ytdl_opts.update(user_args_copy)
             
             # Only use ignoreerrors if user explicitly enabled it via /args
