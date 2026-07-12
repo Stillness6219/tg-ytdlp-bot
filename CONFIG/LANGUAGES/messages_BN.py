@@ -1403,6 +1403,7 @@ class Messages(object):
     ALWAYS_ASK_GEO_RESTRICTED_MSG = "\U0001F30D <b>This video is not available in your region.</b>\nThe uploader has restricted it geographically \u2014 try a VPN/proxy or another link."
     ALWAYS_ASK_AGE_RESTRICTED_MSG = "\U0001F51E <b>This video requires age verification.</b>\nTry using /cookie to provide YouTube cookies from an age-verified account."
     ALWAYS_ASK_HTTP_500_MSG = "\U0001F6E0\uFE0F <b>The video server returned an internal error (HTTP 500).</b>\nThis is temporary \u2014 please try again later."
+    ALWAYS_ASK_EXTRACTOR_ERROR_MSG = "\u26a0\ufe0f <b>The video extractor failed to parse the page.</b>\nThis usually happens when the platform (e.g. Facebook) changes its structure. Try updating yt-dlp or using cookies via <code>/cookie</code>."
     ALWAYS_ASK_TRY_CLEAN_COMMAND_MSG = "<code>/clean</code> কমান্ড চেষ্টা করুন এবং আবার চেষ্টা করুন। যদি ত্রুটি অব্যাহত থাকে, YouTube-এর জন্য অনুমোদনের প্রয়োজন। <code>/cookie</code> বা <code>/cookies_from_browser</code> এর মাধ্যমে cookies.txt আপডেট করুন এবং আবার চেষ্টা করুন।"
     ALWAYS_ASK_MENU_CLOSED_MSG = "মেনু বন্ধ করা হয়েছে।"
     ALWAYS_ASK_MANUAL_QUALITY_SELECTION_MSG = "🎛 ম্যানুয়াল মান নির্বাচন"

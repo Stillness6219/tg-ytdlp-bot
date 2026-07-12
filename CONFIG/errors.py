@@ -68,10 +68,15 @@ GEO_BLOCK_PATTERNS = [
     "blocked in your country",
     "not available in your country",
     "not available in your region",
-    "video limitato geograficamente",
+    "not available in your area",
+    "not available from your location",
+    "not available outside",
+    "available only in",
+    "geographically restricted",
     "geographic restriction",
     "geo-blocked",
     "region blocked",
+    "rights restrictions",
     "this video is available in",
 ]
 
@@ -135,8 +140,8 @@ def classify_yt_dlp_error(error_message, url=None):
     """Classify a yt-dlp/extractor error string into a semantic category.
 
     Returns one of: MEMBERS_ONLY, LIVE_ENDED, GEO_RESTRICTED, AGE_RESTRICTED,
-    HTTP_500 — or None if the error is not recognised (fall through to generic
-    handling).
+    HTTP_500, EXTRACTOR_ERROR — or None if the error is not recognised (fall
+    through to generic handling).
 
     Note: a geo/members/age error can still be actionable via cookies, so the
     caller keeps appending the cookie hint for those categories.
@@ -172,5 +177,11 @@ def classify_yt_dlp_error(error_message, url=None):
     # Upstream server error (issue #356) — transient, show "try again later"
     if "http error 500" in error_lower or "internal server error" in error_lower:
         return "HTTP_500"
+
+    # Extractor/parse failure (issue #328) — Facebook and other platforms change
+    # page structure, breaking yt-dlp's extractor. Show a friendly message
+    # suggesting yt-dlp update or cookies rather than the raw "Cannot parse data".
+    if "cannot parse data" in error_lower or "unable to extract" in error_lower or "extractor error" in error_lower:
+        return "EXTRACTOR_ERROR"
 
     return None

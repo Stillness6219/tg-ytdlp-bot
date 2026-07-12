@@ -96,7 +96,7 @@ def get_video_formats(url, user_id=None, playlist_start_index=1, cookies_already
         'geo_bypass': True,
         # check_certificate and no_check_certificates are set from user_args (default: check_certificate=False, no_check_certificates=True)
         'live_from_start': True,
-        'socket_timeout': 30,
+        'socket_timeout': 60,
     }
     
     # Add match_filter only if domain is not in NO_FILTER_DOMAINS

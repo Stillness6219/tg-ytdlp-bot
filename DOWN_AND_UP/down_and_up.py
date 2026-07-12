@@ -85,6 +85,20 @@ def is_skippable_video_error(error_message: str) -> bool:
         "video unavailable",
         "this video has been removed",
         "video is not available",
+        # Приватные/недоступные видео в плейлистах (issue #374)
+        "private video",
+        "this video is private",
+        "premieres in",
+        "members-only",
+        "join this channel",
+        "sign in to confirm your age",
+        "age-restricted",
+        "video not available",
+        # Geo-blocked в плейлистах (issue #374)
+        "not available in your country",
+        "not made this video available",
+        "geo-blocked",
+        "geo restricted",
         # Общие паттерны
         "copyright holder",
         "violating.*policy",
@@ -998,7 +1012,7 @@ def down_and_up(app, message, url, playlist_name, video_count, video_start_with,
                 'extractor_args': {
                     'youtubetab': {'skip': ['authcheck']}
                 },
-                'socket_timeout': 30,
+                'socket_timeout': 60,
             }
             # Try to use cookies from download directory first, then fallback to user root
             download_cookie_path = os.path.join(user_dir_name, "cookie.txt")
@@ -1368,10 +1382,11 @@ def down_and_up(app, message, url, playlist_name, video_count, video_start_with,
                 # check_certificate and no_check_certificates are set from user_args (default: check_certificate=False, no_check_certificates=True)
                 'live_from_start': True if not did_live_from_start_retry else False,
                 # Network resilience: retry on transient failures (incomplete downloads, timeouts)
-                'retries': 10,
+                'retries': 5,
                 'fragment_retries': 10,
                 'file_access_retries': 3,
-                'socket_timeout': 30,
+                'socket_timeout': 60,
+                'source_address': '0.0.0.0',
             }
             
             # Add download_sections if trim is enabled
@@ -1548,8 +1563,12 @@ def down_and_up(app, message, url, playlist_name, video_count, video_start_with,
                             common_opts['cookiefile'] = None
                             logger.info(f"No user cookies found for non-YouTube URL: {url}, will try fallback during download")
             
-            # If this is not a playlist with a range, add --no-playlist to the URL with the list parameter
-            if not is_playlist and 'list=' in url:
+            # If this is not a playlist, always tell yt-dlp not to treat it as one.
+            # Previously only set for URLs containing 'list=', but YouTube Shorts
+            # and other single-video URLs without 'list=' can still be routed by
+            # yt-dlp through a playlist/tab extractor, causing "No videos found
+            # in playlist" (issue #377).
+            if not is_playlist:
                 common_opts['noplaylist'] = True
             
             # Always use progress_hooks, even for HLS
@@ -2896,8 +2915,11 @@ def down_and_up(app, message, url, playlist_name, video_count, video_start_with,
                     if not error_message_sent:
                         error_str = str(e)
                         # Check for geo-block error and add proxy hint
-                        from CONFIG.errors import is_geo_block_error, has_country_list_in_error
-                        if is_geo_block_error(error_str):
+                        from CONFIG.errors import is_geo_block_error, has_country_list_in_error, classify_yt_dlp_error
+                        _dl_err_cat = classify_yt_dlp_error(error_str, url)
+                        if _dl_err_cat == "EXTRACTOR_ERROR":
+                            send_to_user(message, safe_get_messages(user_id).ALWAYS_ASK_EXTRACTOR_ERROR_MSG, parse_mode=enums.ParseMode.HTML)
+                        elif is_geo_block_error(error_str):
                             if has_country_list_in_error(error_str):
                                 # Countries listed in error — proxy retry should have already been attempted
                                 send_to_user(message, f"❌ <b>Video is geo-blocked</b>\n\n<code>{error_str[:500]}</code>\n\n💡 The video is restricted to specific countries. Enable proxy (<code>/proxy</code>) so the bot can try proxies from those countries.")
@@ -4170,6 +4192,8 @@ def down_and_up(app, message, url, playlist_name, video_count, video_start_with,
                                         v_w, v_h, v_dur = width, height, part_duration
                                     
                                     _split_thumb = splited_thumb_dir if (splited_thumb_dir and os.path.exists(splited_thumb_dir)) else None
+                                    if not os.path.exists(path_lst[p]):
+                                        raise FileNotFoundError(f"Video file not found: {path_lst[p]}")
                                     # Create open copy for history (without stars) - send directly to NSFW channel
                                     # NOTE: no reply_parameters — message.id is from user chat and does not exist in log channel
                                     open_video_msg = timed_upload(lambda: app.send_video(

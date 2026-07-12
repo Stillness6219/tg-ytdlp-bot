@@ -189,7 +189,7 @@ def get_direct_link_with_proxy(url: str, format_spec: str = "bv+ba/best", user_i
             'extract_flat': False,
             'nocheckcertificate': True,
             'ignoreerrors': False,
-            'socket_timeout': 30,
+            'socket_timeout': 60,
         }
         
         # Add proxy configuration if enabled for user or domain requires it

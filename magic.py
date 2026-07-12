@@ -38,6 +38,7 @@ from pyrogram.types import (
 ###########################################################
 # CONFIG
 from CONFIG.config import Config
+from CONFIG.limits import LimitsConfig
 from CONFIG.messages import Messages, safe_get_messages
 
 # HELPERS (только те, что не содержат обработчики)
@@ -56,12 +57,16 @@ from HELPERS.safe_messeger import *
 #        APP INITIALIZATION
 ###########################################################
 # Pyrogram App Initialization
-app = Client(
-    "magic",
+import inspect as _inspect
+_client_kwargs = dict(
+    name="magic",
     api_id=Config.API_ID,
     api_hash=Config.API_HASH,
-    bot_token=Config.BOT_TOKEN
+    bot_token=Config.BOT_TOKEN,
 )
+if 'upload_timeout' in _inspect.signature(Client.__init__).parameters:
+    _client_kwargs['upload_timeout'] = LimitsConfig.UPLOAD_TIMEOUT_SECONDS
+app = Client(**_client_kwargs)
 
 # Set global app instance BEFORE importing handlers
 set_app(app)
