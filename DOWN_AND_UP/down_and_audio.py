@@ -2793,8 +2793,8 @@ def down_and_audio(app, message, url, tags, quality_key=None, playlist_name=None
                         _start_upload_logging(user_id, proc_msg_id)
                     try:
                         _prog_args = (user_id, proc_msg_id, _upload_status_text) if proc_msg_id else None
-                        if file_ext == '.mp3' or file_ext == '.m4a':
-                            # Send as audio for supported formats
+                        if file_ext in ('.mp3', '.m4a', '.opus', '.ogg'):
+                            # Send as audio (Telegram player supports MP3, M4A, OGG/OPUS)
                             if telegram_thumb and os.path.exists(telegram_thumb):
                                 audio_msg = timed_upload(lambda: app.send_audio(
                                     chat_id=user_id, 
