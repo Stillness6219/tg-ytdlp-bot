@@ -1563,8 +1563,12 @@ def down_and_up(app, message, url, playlist_name, video_count, video_start_with,
                             common_opts['cookiefile'] = None
                             logger.info(f"No user cookies found for non-YouTube URL: {url}, will try fallback during download")
             
-            # If this is not a playlist with a range, add --no-playlist to the URL with the list parameter
-            if not is_playlist and 'list=' in url:
+            # If this is not a playlist, always tell yt-dlp not to treat it as one.
+            # Previously only set for URLs containing 'list=', but YouTube Shorts
+            # and other single-video URLs without 'list=' can still be routed by
+            # yt-dlp through a playlist/tab extractor, causing "No videos found
+            # in playlist" (issue #377).
+            if not is_playlist:
                 common_opts['noplaylist'] = True
             
             # Always use progress_hooks, even for HLS

@@ -1148,7 +1148,12 @@ def down_and_audio(app, message, url, tags, quality_key=None, playlist_name=None
             
             # Only use ignoreerrors if user explicitly enabled it via /args
             ytdl_opts['ignoreerrors'] = ignore_errors
-            
+
+            # Prevent yt-dlp from routing non-playlist URLs through playlist/tab
+            # extractors, which causes "No videos found in playlist" (issue #377).
+            if not is_playlist:
+                ytdl_opts['noplaylist'] = True
+
             # Log final yt-dlp options for debugging
             log_ytdlp_options(user_id, ytdl_opts, "audio_download")
             
@@ -2204,8 +2209,12 @@ def down_and_audio(app, message, url, tags, quality_key=None, playlist_name=None
                              'socket_timeout': 60,
                              'source_address': '0.0.0.0',
                           }
-                        
-                        # Add match_filter only if domain is not in NO_FILTER_DOMAINS
+
+                        # Prevent yt-dlp from routing non-playlist URLs through playlist/tab
+                        # extractors (issue #377).
+                        if not is_playlist:
+                           ytdl_opts['noplaylist'] = True
+
                         if not is_no_filter_domain(url):
                             ytdl_opts['match_filter'] = create_smart_match_filter(user_id=user_id, message=message)
                         

@@ -14,7 +14,6 @@ except Exception:
     enums = None
 import re
 from CONFIG.config import Config
-from services.stats_events import capture_message_context
 
 
 def safe_send_message(*args, **kwargs):
@@ -26,6 +25,20 @@ def safe_send_message(*args, **kwargs):
     """
     from HELPERS.safe_messeger import safe_send_message as _real
     return _real(*args, **kwargs)
+
+
+def _capture_message_context(message):
+    """Lazy wrapper around services.stats_events.capture_message_context.
+
+    Defers the import so that standalone scripts (e.g.
+    DATABASE/download_firebase.py) can import this module without pulling
+    in the services.* dependency chain (which transitively imports pyrogram).
+    """
+    try:
+        from services.stats_events import capture_message_context
+        capture_message_context(message)
+    except Exception:
+        pass
 
 
 def _html_parse_mode():
@@ -107,7 +120,7 @@ def get_log_channel(kind: str = "general", nsfw: bool = False, paid: bool = Fals
 # Send Message to Logger
 
 def send_to_logger(message, msg):
-    capture_message_context(message)
+    _capture_message_context(message)
     user_id = message.chat.id
     msg_with_id = f"{message.chat.first_name} - {user_id}\n \n{msg}"
     # Print (user_id, "-", msg)
@@ -117,7 +130,7 @@ def send_to_logger(message, msg):
 # Send Message to User Only
 
 def send_to_user(message, msg):
-    capture_message_context(message)
+    _capture_message_context(message)
     user_id = message.chat.id
     # Маскируем секретные данные перед отправкой пользователю
     sanitized_msg = sanitize_error_message(str(msg))
@@ -126,7 +139,7 @@ def send_to_user(message, msg):
 # Send Message to All ...
 
 def send_to_all(message, msg, parse_mode=None):
-    capture_message_context(message)
+    _capture_message_context(message)
     user_id = message.chat.id
     msg_with_id = f"{message.chat.first_name} - {user_id}\n \n{msg}"
     safe_send_message(get_log_channel("general"), msg_with_id, parse_mode=_html_parse_mode())
@@ -188,7 +201,7 @@ def sanitize_error_message(error_text: str) -> str:
 
 # Send Error Message to User and LOG_EXCEPTION channel
 def send_error_to_user(message, msg, url: str = None):
-    capture_message_context(message)
+    _capture_message_context(message)
     """Send error message to user and log it to LOG_EXCEPTION channel.
 
     url: optional explicit URL that caused the error; if not provided, will be
@@ -213,7 +226,7 @@ def send_error_to_user(message, msg, url: str = None):
 
 # Log error message to LOG_EXCEPTION channel (without sending to user)
 def log_error_to_channel(message, msg, url: str = None):
-    capture_message_context(message)
+    _capture_message_context(message)
     """Log error message to LOG_EXCEPTION channel only.
 
     url: optional explicit URL that caused the error; if not provided, will be
