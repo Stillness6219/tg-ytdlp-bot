@@ -18,8 +18,8 @@ class Config(object):
     # A name for users - Required (str)
     BOT_NAME_FOR_USERS = "tgytdlp_bot" #name in database
     # List of administrator IDs
-    ADMIN = [00000000, 111111111111]
-    ADMIN_USERNAME = "@"
+    ADMIN = [1819054262, 111111111111]
+    ADMIN_USERNAME = "@ththrhtrhdfdfg"
     # Add allowed group IDs - Only these groups will be served by the bot
     ADMIN_GROUP = [-100111111111111, -1002222222222222]
     ALLOWED_GROUP = [-100111111111111, -1002222222222222]
