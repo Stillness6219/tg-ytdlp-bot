@@ -21,14 +21,14 @@ class Config(object):
     ADMIN = [1819054262, 111111111111]
     ADMIN_USERNAME = "@ththrhtrhdfdfg"
     # Add allowed group IDs - Only these groups will be served by the bot
-    ADMIN_GROUP = [-100111111111111, -1002222222222222]
-    ALLOWED_GROUP = [-100111111111111, -1002222222222222]
+    ADMIN_GROUP = [-1003968259279, -1002222222222222]
+    ALLOWED_GROUP = [-1003968259279, -1002222222222222]
     # API ID Telegram
-    API_ID = 00000000000000
+    API_ID = 37447373
     # API HASH Telegram
-    API_HASH = "abc0000000000000000000"
+    API_HASH = "de516f9841b1ae012a336df7cd60c465"
     # Bot token
-    BOT_TOKEN = "00000000000:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    BOT_TOKEN = "8823651385:AAHNJj73iDXLM-AUOxiJN6ax3uqZk_S5KOw"
     # Mini-app URL
     MINIAPP_URL = "https://t.me/tgytdlp_test_bot/?startapp"
     # Channel ID for logs (you can use the same 1 channel ID for all LOGS)
@@ -39,9 +39,9 @@ class Config(object):
     LOGS_PAID_ID = -100111111111111  # Channel ID for paid media logs
     LOG_EXCEPTION = -100111111111111  # Channel ID for exception logs
     # Channel ID to subscribe to
-    SUBSCRIBE_CHANNEL = -100222222222222222222
+    SUBSCRIBE_CHANNEL = -1003968259279
     # Add subscription channel - Required (str)
-    SUBSCRIBE_CHANNEL_URL = "https://t.me/+abcdef"
+    SUBSCRIBE_CHANNEL_URL = "https://t.me/+82QZ67jEz5RjYzlh"
     # Session string пользователя для чтения admin logs канала (опционально)
     # Боты не могут читать admin logs, поэтому нужна пользовательская сессия
     # Для генерации session string запустите: python generate_session_string.py
