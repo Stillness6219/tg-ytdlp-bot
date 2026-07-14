@@ -769,9 +769,9 @@ def send_videos(
                 is_private_chat = True
             # Проверяем, должен ли админ получать платный контент
             from HELPERS.limitter import should_apply_limits_to_admin
-            should_send_paid = is_spoiler and is_private_chat and should_apply_limits_to_admin(user_id=user_id, message=message)
+            should_send_paid = False
             # Also paid if subtitle hard-burn with star cost > 0
-            is_sub_paid = (paid_star_count > 0) and is_private_chat and should_apply_limits_to_admin(user_id=user_id, message=message)
+            is_sub_paid = False
             effective_paid = should_send_paid or is_sub_paid
             effective_star_count = paid_star_count if is_sub_paid else (LimitsConfig.NSFW_STAR_COST if should_send_paid else 0)
             if effective_paid:
